@@ -1,0 +1,38 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: my-opentel
+spec:
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+    processors:
+      batch:
+        timeout: 1s
+      resource:
+        attributes:
+          key: fruits.key
+          value: "gateway"
+          action: insert
+    exporters:
+      logging:
+        loglevel: info
+      jaeger:
+        endpoint: my-jaeger-collector.testfoo.svc:14250
+        tls:
+          insecure: true
+    service:
+      telemetry:
+        logs:
+          level: debug
+          initial_fields:
+            service: fruits
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [logging,jaeger]
+  mode: deployment
