@@ -2,7 +2,9 @@ apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
   name: my-opentel
+  namespace: opentel
 spec:
+  mode: deployment
   config: |
     receivers:
       otlp:
@@ -14,16 +16,16 @@ spec:
         timeout: 1s
       resource:
         attributes:
-          key: fruits.key
-          value: "gateway"
-          action: insert
+          - key: fruits.key
+            value: "gateway"
+            action: insert
     exporters:
       logging:
         loglevel: info
       jaeger:
-        endpoint: my-jaeger-collector.testfoo.svc:14250
+        endpoint: my-jaeger-collector-headless.opentel.svc:14250
         tls:
-          insecure: true
+          ca_file: "/etc/pki/ca-trust/source/service-ca/service-ca.crt"
     service:
       telemetry:
         logs:
@@ -34,5 +36,11 @@ spec:
         traces:
           receivers: [otlp]
           processors: [batch]
-          exporters: [logging,jaeger]
-  mode: deployment
+          exporters: [logging, jaeger]
+  volumeMounts:
+    - mountPath: /etc/pki/ca-trust/source/service-ca
+      name: cabundle-volume
+  volumes:
+    - configMap:
+        name: my-opentel-cabundle
+      name: cabundle-volume

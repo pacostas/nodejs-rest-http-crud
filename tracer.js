@@ -31,9 +31,6 @@ registerInstrumentations({
 });
 
 // Tracer exporter
-// const collectorOptions = {
-//   url: 'http://my-opentel-collector:4318'
-// };
 const traceExporter = new OTLPTraceExporter();
 provider.addSpanProcessor(new BatchSpanProcessor(traceExporter, {
   maxQueueSize: 100,
