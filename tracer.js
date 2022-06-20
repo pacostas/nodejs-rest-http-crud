@@ -15,7 +15,7 @@ const { PgInstrumentation } = require('@opentelemetry/instrumentation-pg');
 // Collector trace exporter
 const { Resource } = require('@opentelemetry/resources');
 const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
-const { BatchSpanProcessor } = require('@opentelemetry/sdk-trace-base');
+const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
 
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
@@ -35,13 +35,7 @@ registerInstrumentations({
 
 // Tracer exporter
 const traceExporter = new OTLPTraceExporter({ url: 'http://opentel-collector-headless.opentel.svc:4318/v1/traces' });
-provider.addSpanProcessor(new BatchSpanProcessor(traceExporter, {
-  maxQueueSize: 100,
-  maxExportBatchSize: 10,
-  scheduledDelayMillis: 500,
-  exportTimeoutMillis: 30000
-}));
-
+provider.addSpanProcessor(new SimpleSpanProcessor(traceExporter));
 provider.register();
 
 // SDK configuration and start up
