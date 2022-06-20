@@ -1,5 +1,7 @@
 'use strict';
 
+const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
+
 // SDK
 const opentelemetry = require('@opentelemetry/sdk-node');
 
@@ -16,11 +18,12 @@ const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventi
 const { BatchSpanProcessor } = require('@opentelemetry/sdk-trace-base');
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
 
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+
 // Tracer provider
 const provider = new NodeTracerProvider({
   resource: new Resource({ [SemanticResourceAttributes.SERVICE_NAME]: 'fruits' })
 });
-provider.register();
 
 registerInstrumentations({
   instrumentations: [
@@ -31,7 +34,7 @@ registerInstrumentations({
 });
 
 // Tracer exporter
-const traceExporter = new OTLPTraceExporter();
+const traceExporter = new OTLPTraceExporter({ url: 'http://opentel-collector-headless.opentel.svc:4318/v1/traces' });
 provider.addSpanProcessor(new BatchSpanProcessor(traceExporter, {
   maxQueueSize: 100,
   maxExportBatchSize: 10,

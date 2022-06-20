@@ -18,6 +18,7 @@ spec:
         protocols:
           grpc:
           http:
+            endpoint: opentel-collector-headless.opentel.svc:4318
     processors:
       batch:
         timeout: 1s
